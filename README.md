@@ -58,6 +58,54 @@ all text lines following `Cisco router config:` are added to the
 configuration of the router. That way the basics of a routing
 protocol can be easily added to all routers.
 
+In the sample topology this configuration will be generated for R1:
+
+```
+R1#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#interface lo0
+R1(config-if)# ip address 172.16.1.1 255.255.255.255
+R1(config-if)#interface f0/0
+R1(config-if)# description IOU1 e0/0 VLAN 5
+R1(config-if)# ip address 10.255.1.1 255.255.255.0
+R1(config-if)# no shutdown
+R1(config-if)#interface f0/1
+R1(config-if)# description IOU2 e0/0 VLAN 10
+R1(config-if)# ip address 10.255.2.1 255.255.255.0
+R1(config-if)# no shutdown
+R1(config-if)#router ospf 1
+R1(config-router)# network 172.16.1.0 0.0.0.255 area 0
+R1(config-router)# network 10.255.0.0 0.0.255.255 area 0
+R1(config-router)# passive-interface lo0
+R1(config-router)#end
+```
+
+The switch IOU2 gets the following configuration:
+
+```
+IOU2#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+IOU2(config)#vlan 10
+IOU2(config-vlan)#vlan 20
+IOU2(config-vlan)#interface e0/0
+IOU2(config-if)# description R1 f0/1
+IOU2(config-if)# switchport access vlan 10
+IOU2(config-if)# switchport mode access
+IOU2(config-if)#interface e0/1
+IOU2(config-if)# description R2 f0/1
+IOU2(config-if)# switchport access vlan 20
+IOU2(config-if)# switchport mode access
+IOU2(config-if)#interface e0/2
+IOU2(config-if)# description R3 f0/0
+IOU2(config-if)# switchport access vlan 10
+IOU2(config-if)# switchport mode access
+IOU2(config-if)#interface e1/3
+IOU2(config-if)# description ESW1 f1/15 Trunk
+IOU2(config-if)# switchport trunk encapsulation dot1q
+IOU2(config-if)# switchport mode trunk
+IOU2(config-if)#end
+```
+
 
 ## Manual Usage
 
