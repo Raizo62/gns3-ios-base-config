@@ -112,8 +112,8 @@ IOU2(config-if)#end
 You need a working Python 2.7 or Python 3 installation. Then
 download ios_base_config.py to a directory of your choice.
 Additionally we need gns3api.py, download it from
-<https://github.com/ehlers/gns3api> and save it in the same
-directory. Then start the GNS3 GUI and open the project.
+<https://git.bernhard-ehlers.de/ehlers/gns3api> and save it in the
+same directory. Then start the GNS3 GUI and open the project.
 Now you can start ios_base_config.py:
 
 ```
@@ -121,12 +121,7 @@ Now you can start ios_base_config.py:
 ```
 
 
-## Integration in GNS3
-
-The integration of external programs and scripts in GNS3 is shown in
-<http://www.bernhard-ehlers.de/blog/2018/01/12/gns3-integrate-programs.html>.
-
-### Integration as a custom console command
+## Integration in GNS3 as a custom console command
 
 First copy ios_base_config.py and gns3api.py to the `GNS3/tools`
 directory.
@@ -144,15 +139,3 @@ gnome-terminal, mate-terminal, xfce4-terminal, ...
 
 **Mac OS X**  
 `osascript -e 'tell application "Terminal"' -e 'activate' -e 'do script "echo -n -e \"\\033]0;%d\\007\"; clear; PATH=\"" & (system attribute "PATH") & "\" GNS3/tools/ios_base_config.py %i"' -e 'end tell'`
-
-
-### Integration as an external Tool
-
-If you are using a GNS3 GUI with the tools extension it's quite
-easy. Simply copy ios_base_config.py, ios_base_config.json and
-gns3api.py to the `GNS3/tools` directory. Afterwards restart
-the GNS3 GUI.
-
-Windows recognizes gns3api.py as an external tool. To prevent,
-that it shows in the tools or context menu, create a dummy
-`gns3api.json` with `{ "menu": false, "context": false }`.
