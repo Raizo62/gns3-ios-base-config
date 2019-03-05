@@ -110,7 +110,7 @@ def get_project_data(project_id, sel_items):
     try:
         api = gns3api.GNS3Api()
         api_version = api.request('GET', '/v2/version')['version']
-    except (IOError, OSError, gns3api.GNS3BaseException) as err:
+    except (IOError, OSError) as err:
         die("Can't connect to GNS3 controller:", err)
 
     # get all node and link information
@@ -153,7 +153,7 @@ def get_project_data(project_id, sel_items):
                 if svg[0].tag == 'text':
                     notes.append(svg[0].text)
 
-    except (IOError, OSError, gns3api.GNS3BaseException) as err:
+    except (IOError, OSError) as err:
         die("Can't get node/link information:", err)
 
     nodes = select_nodes(all_nodes, all_links, sel_items)
@@ -536,7 +536,7 @@ def get_project_id(argv):
             # connect to GNS3 controller
             try:
                 api = gns3api.GNS3Api()
-            except (IOError, OSError, gns3api.GNS3BaseException) as err:
+            except (IOError, OSError) as err:
                 die("Can't connect to GNS3 controller:", err)
 
             # search for the project id
