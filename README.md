@@ -4,9 +4,9 @@ In GNS3 it's a bit boring to create the initial configuration
 each time a new project is created. Therefore I'm trying to
 automate that. `ios_base_config.py` is a Python script, that
 is called by the GNS3 GUI. It connects to the GNS3 server via
-the API (<http://api.gns3.net/>), retrieves the node and link
-information and uses that to create a base configuration for
-the Cisco IOS router and switches. Then it connects to the
+the API (<https://gns3-server.readthedocs.io/>), retrieves the
+node and link information and uses that to create a base configuration
+for the Cisco IOS router and switches. Then it connects to the
 console of the virtual devices and enters the configuration.
 
 On routers it configures Loopback0, the interfaces with an IP
@@ -60,7 +60,7 @@ protocol can be easily added to all routers.
 
 In the sample topology this configuration will be generated for R1:
 
-```
+```text
 R1#configure terminal
 Enter configuration commands, one per line.  End with CNTL/Z.
 R1(config)#interface lo0
@@ -82,7 +82,7 @@ R1(config-router)#end
 
 The switch IOU2 gets the following configuration:
 
-```
+```text
 IOU2#configure terminal
 Enter configuration commands, one per line.  End with CNTL/Z.
 IOU2(config)#vlan 10
@@ -116,7 +116,7 @@ Additionally we need gns3api.py, download it from
 same directory. Then start the GNS3 GUI and open the project.
 Now you can start ios_base_config.py:
 
-```
+```text
 <path>ios_base_config.py <project-name>
 ```
 
