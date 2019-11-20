@@ -72,7 +72,7 @@ def send_cisco_commands(name, host, port, commands, privileged=True):
         tn.write(b"\r")
         try:
             response = tn.expect([prompt], 5)[2]
-        except IOError:
+        except OSError:
             pass
         tn.write(b"\r")		# second <return>
         response = tn.expect([prompt], 5)[2]
@@ -93,7 +93,7 @@ def send_cisco_commands(name, host, port, commands, privileged=True):
         status = "close"
         tn.close()
 
-    except IOError as err:
+    except OSError as err:
         sys.stderr.write("{}: I/O error during {} - {}\n".format(name, status, err))
         return False
     except KeyboardInterrupt:
@@ -109,8 +109,7 @@ def get_project_data(project_id, sel_items):
     # connect to GNS3 controller
     try:
         api = gns3api.GNS3Api()
-        api_version = api.request('GET', '/v2/version')['version']
-    except (IOError, OSError) as err:
+    except gns3api.GNS3ApiException as err:
         die("Can't connect to GNS3 controller:", err)
 
     # get all node and link information
@@ -129,20 +128,16 @@ def get_project_data(project_id, sel_items):
             compute_host[compute["compute_id"]] = compute["host"]
         for node in api.request('GET', ('/v2/projects', project_id, 'nodes')):
             console_host = node.get("console_host")
-            if console_host == "0.0.0.0" or console_host == "::":
+            if console_host in ('0.0.0.0', '::'):
                 node["console_host"] = compute_host[node["compute_id"]]
             all_nodes[node["node_id"]] = node
         for link in api.request('GET', ('/v2/projects', project_id, 'links')):
             all_links[link["link_id"]] = link
 
         if sel_items:			# get selected notes
-            if api_version < '2.1.2':
-                drawings_method = 'PUT'	# GET implemented in v2.1.2
-            else:
-                drawings_method = 'GET'
             for item in sel_items:
                 if item.startswith("text_drawings/"):
-                    drawing = api.request(drawings_method, \
+                    drawing = api.request('GET', \
                         ('/v2/projects', project_id, "drawings", item[14:]))
                     svg = ET.fromstring(drawing["svg"])
                     if svg[0].tag == 'text':
@@ -153,7 +148,7 @@ def get_project_data(project_id, sel_items):
                 if svg[0].tag == 'text':
                     notes.append(svg[0].text)
 
-    except (IOError, OSError) as err:
+    except gns3api.GNS3ApiException as err:
         die("Can't get node/link information:", err)
 
     nodes = select_nodes(all_nodes, all_links, sel_items)
@@ -536,7 +531,7 @@ def get_project_id(argv):
             # connect to GNS3 controller
             try:
                 api = gns3api.GNS3Api()
-            except (IOError, OSError) as err:
+            except gns3api.GNS3ApiException as err:
                 die("Can't connect to GNS3 controller:", err)
 
             # search for the project id

@@ -2,7 +2,7 @@
 
 In GNS3 it's a bit boring to create the initial configuration
 each time a new project is created. Therefore I'm trying to
-automate that. `ios_base_config.py` is a Python script, that
+automate that. `ios_base_config.py` is a Python 3 script, that
 is called by the GNS3 GUI. It connects to the GNS3 server via
 the API (<https://gns3-server.readthedocs.io/>), retrieves the
 node and link information and uses that to create a base configuration
@@ -109,8 +109,8 @@ IOU2(config-if)#end
 
 ## Manual Usage
 
-You need a working Python 2.7 or Python 3 installation. Then
-download ios_base_config.py to a directory of your choice.
+You need a working Python 3 installation. Then download
+ios_base_config.py to a directory of your choice.
 Additionally we need gns3api.py, download it from
 <https://git.bernhard-ehlers.de/ehlers/gns3api> and save it in the
 same directory. Then start the GNS3 GUI and open the project.
