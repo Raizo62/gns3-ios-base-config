@@ -117,7 +117,7 @@ same directory. Then start the GNS3 GUI and open the project.
 Now you can start ios_base_config.py:
 
 ```text
-<path>ios_base_config.py <project-name>
+<path>ios_base_config.py [<GNS3 profile>] <project-name>
 ```
 
 

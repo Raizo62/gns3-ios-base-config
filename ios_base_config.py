@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2018 Bernhard Ehlers
+# Copyright (C) 2018-2019 Bernhard Ehlers
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,14 +103,8 @@ def send_cisco_commands(name, host, port, commands, privileged=True):
     return True			# No error
 
 
-def get_project_data(project_id, sel_items):
+def get_project_data(api, project_id, sel_items):
     """ get node (with link information) and notes of a project by GNS3 API """
-
-    # connect to GNS3 controller
-    try:
-        api = gns3api.GNS3Api()
-    except gns3api.GNS3ApiException as err:
-        die("Can't connect to GNS3 controller:", err)
 
     # get all node and link information
     all_nodes = {}
@@ -513,29 +507,34 @@ def select_cisco_devices(nodes, notes):
     return devices
 
 
-def get_project_id(argv):
+def parse_args(argv):
     """ parse command line args and determine the project ID """
 
-    if len(argv) <= 1 or argv[1] == '-h' or argv[1] == '-?':
+    argc = len(argv)
+    if argc <= 1 or argv[1] == '-h' or argv[1] == '-?':
         prog_name = os.path.splitext(os.path.basename(argv[0]))[0]
-        die("Usage: {} <project>".format(prog_name))
+        die("Usage: {} [<GNS3 profile>] <project>".format(prog_name))
 
-    project_id = None
-    sel_items = []
-
-    if len(argv) == 2:			# started as a script
-        try:				# check, if argument is project UUID
-            uuid.UUID(argv[1])
-            project_id = argv[1]
-        except ValueError:		# argument is project name
-            # connect to GNS3 controller
-            try:
-                api = gns3api.GNS3Api()
-            except gns3api.GNS3ApiException as err:
-                die("Can't connect to GNS3 controller:", err)
-
-            # search for the project id
+    if argc <= 3:			# started as a script
+        if argc == 2:			# only project, default profile
+            profile = None
             project_name = argv[1]
+        else:
+            profile = argv[1]
+            project_name = argv[2]
+        sel_items = []
+
+        # connect to GNS3 controller
+        try:
+            api = gns3api.GNS3Api(profile=profile)
+        except gns3api.GNS3ApiException as err:
+            die("Can't connect to GNS3 controller:", err)
+
+        try:				# check, if project is UUID
+            uuid.UUID(project_name)
+            project_id = project_name
+        except ValueError:		# convert project name to UUID
+            # search for the project id
             for proj in api.request('GET', '/v2/projects'):
                 if proj['name'] == project_name:
                     project_id = proj['project_id']
@@ -543,20 +542,33 @@ def get_project_id(argv):
             else:
                 die("Project '{}' not found".format(project_name))
 
-    elif len(argv) >= 3:		# started as an external tool
-        project_id = argv[2]
-        sel_items = argv[3:]
+    else:				# started as an external tool
+        try:
+            with open(argv[2], "r") as file:
+                ctl_url, ctl_user, ctl_passwd, *_ = file.read(512).splitlines()
+            if argv[2].endswith(".tmp"):
+                os.remove(argv[2])
+        except (OSError, ValueError) as err:
+            die("Can't get controller connection params:", err)
+        project_id = argv[3]
+        sel_items = argv[4:]
 
-    return project_id, sel_items
+        # connect to GNS3 controller
+        try:
+            api = gns3api.GNS3Api(ctl_url, ctl_user, ctl_passwd)
+        except gns3api.GNS3ApiException as err:
+            die("Can't connect to GNS3 controller:", err)
+
+    return api, project_id, sel_items
 
 
 def main(argv):
     """ Main function """
 
-    project_id, sel_items = get_project_id(argv)
+    api, project_id, sel_items = parse_args(argv)
 
     # get nodes (with link informations) and notes by GNS3 API
-    nodes, notes = get_project_data(project_id, sel_items)
+    nodes, notes = get_project_data(api, project_id, sel_items)
     if not nodes:
         die("No nodes selected")
     vlan_interfaces = get_vlan_interfaces(nodes)
