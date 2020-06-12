@@ -112,7 +112,7 @@ IOU2(config-if)#end
 You need a working Python 3 installation. Then download
 ios_base_config.py to a directory of your choice.
 Additionally we need gns3api.py, download it from
-<https://git.bernhard-ehlers.de/ehlers/gns3api> and save it in the
+<https://git.b-ehlers.de/ehlers/gns3api> and save it in the
 same directory. Then start the GNS3 GUI and open the project.
 Now you can start ios_base_config.py:
 
